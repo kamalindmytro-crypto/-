@@ -1,0 +1,30 @@
+name: Перевірка нагадувань
+
+on:
+  schedule:
+    # GitHub's minimum cron granularity is 5 minutes. Actual runs can be
+    # delayed a few minutes during high load on GitHub's side — normal.
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  check-reminders:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Warsaw
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run reminder check
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node check-reminders.mjs
